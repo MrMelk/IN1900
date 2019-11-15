@@ -28,10 +28,17 @@ if __name__ == "__main__":
         h = estimate_h(15, 20, 95, 92)
         swaggyBoi = Problem(h, 20)
         bruh = ForwardEuler(swaggyBoi)
-        tp = np.linspace(0, 60*60, 60*5)
+        tp = (0, 15)
         bruh.set_initial_condition(95)
         u, t = bruh.solve(tp)
         swaggyBoi.terminate(u, t, len(u)-1)
+        tol = 1e-6
+        expected = 92
+        computed = u[1]
+        print(np.abs(expected- computed))
+        assert np.abs(expected - computed) < tol
+
+
 
     test_Problem()
 
@@ -40,12 +47,11 @@ if __name__ == "__main__":
     kaffe_h = estimate_h(15, 20, 95, 92)
 
 
-    for i in [20, 21, 22, 23, 24, 25]:
+    for i in [20, 25]:
         kaffelaffe = Problem(kaffe_h, i)
         kaffelaffedaffe = ForwardEuler(kaffelaffe)
         kaffelaffedaffe.set_initial_condition(95)
         u, t = kaffelaffedaffe.solve(tp, terminate = kaffelaffe.terminate)
-        #u, t =kaffelaffedaffe.solve(tp)
         plt.plot(t, u, label = f"Ts = {i}", ls = "--")
     
     plt.legend()

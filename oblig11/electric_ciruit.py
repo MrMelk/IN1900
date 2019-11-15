@@ -15,61 +15,47 @@ Q0 = 1    #C
 
 #dt = 2*np.pi/(60*omega)
 
-def RS(L, R, I, Q, C, t):
-    didt = (E(t) - R*I - Q/C)/L
-    return didt
-"""
-def dqdt(I, t):
-    return I
-"""
+
+
 class Electric:
-    def __init__(self, L, R, I0, Q0, C, t):
-        self.Q = Q0
-        self.I = I0
+    def __init__(self, L, R, C, t):
         self.L = L
         self.R = R
         self.C = C
         self.t = t
     
     def __call__(self, u, t):#takes in a touple of Q and I values and returns it
-       u_q = u[0]
-       u_i = u[1]
+        didt = (E(t) - self.R*u[1] - u[0]/self.C)/self.L
 
-       du_q = 1
-       du_i = RS(self.L, self.R, u_i, u_q, self.C, self.t)
-       return du_q, du_i
+        
+        dqdt = u[1]
 
-tp = np.linspace(0, 2*np.pi/(60*omega), n)
+        return dqdt, didt
 
-problem = Electric(L, R, I0, Q0, C, 0)
+
+
+dt =  2 * np.pi/(60 * omega)
+
+T = 10 * (2 * np.pi/omega)
+N = round(T / dt)
+tp = np.linspace(0, T, N)
+
+problem = Electric(L, R, C, 0)
+
+
 solver = RungeKutta4(problem)
-u0 = (Q0, I0)
+
+u0 = ([I0, Q0])
 solver.set_initial_condition(u0)
 u ,t = solver.solve(tp)
 
-print(u)
-plt.plot(t,u)
+print(len(u))
+print(len(t))
+
+plt.plot(t, u)
+
 plt.show()
-
 """
-class Electric:
-    def __init__(self, L, R, I0, Q0, C, t):
-        self.Q = Q0
-        self.I = I0
-        self.L = L
-        self.R = R
-        self.C = C
-        self.t = t
-    
-    def __call__(self, u, t):#takes in a touple of Q and I values and returns it
-        return dqdt(u, self.t), RS(self.L, self.R, u[1], u[0], self.C, self.t)
+Get a swaggy plot that moves all wavy like inbetween each other
 
-
-tp = np.linspace(0, 2*np.pi/(60*omega), n)
-
-Electric_instance = Electric(L, R, I0, Q0, C, tp)
-swag = RungeKutta4(Electric_instance)
-swag.set_initial_condition((Q0,I0))
-
-u, t = swag.solve(tp)
 """
