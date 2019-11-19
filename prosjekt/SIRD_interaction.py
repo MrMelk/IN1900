@@ -35,6 +35,7 @@ class ProblemInteraction(ProblemSIRD):
     
     def get_population(self):
         self.total_population = [region.population for region in self.region_name]
+        self.total_population = np.sum(self.total_population)
     
     def set_initial_condition(self):
         self.first_list = [self.region.S0, self.region.I0, self.region.R0, self.region.D0 for region in self.region_name]
@@ -52,14 +53,17 @@ class ProblemInteraction(ProblemSIRD):
         n = len(self.region_name)
 
         SIRD_list = [u[i:i+4] for i in range(0, len(u), 4)]
-        
+
         """
         S_list = SIRD_list[t][0]
         I_list = SIRD_list[t][1]
         R_list = SIRD_list[t][2]
         D_list = SIRD_list[t][3]
         """
-
+        S_list = SIRD_list[0::4]
+        I_list = SIRD_list[1::4]
+        R_list = SIRD_list[2::4]
+        D_list = SIRD_list[3::4]
         derivative = []
         for i in range(n):
             S, I, R, D = SIRD_list[i]
@@ -68,6 +72,16 @@ class ProblemInteraction(ProblemSIRD):
             dR = 0
             dD = 0
             for j in range(n):
-                I_other = I_list
+                S_other = S_list[j]
+                I_other = I_list[j]
+                R_other = R_list[j]
+                D_other = D_list[j]
+                dS = (-1) * alpha * S_other * I_other
+                dI = alpha * S_other * I_other - beta * I_other - gamma * I_other
+                dR = beta * I_other
+                dD = gamma * I_other
+                derivative.append(dS, dI, dR, dD)
+        return derivative
 
-
+    def solution(self, u, t):
+        pass
