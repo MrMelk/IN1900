@@ -65,8 +65,6 @@ if __name__ == "__main__":
 """
 From calling the test function I see that we get a timetable, I see that I was off by a little bit
 when thinking what time and decrease would be appropriate. Would prefferto use pytest to test though.
-I don't know if my test is good enough, because in my mind the test is returning true, with it running terminate
-at the end points and therefore it working. Is there a way to improve it?
 
 
 from running this I get the plot with them converging and I have managed to get it to terminate soon(TM)

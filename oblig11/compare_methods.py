@@ -8,21 +8,21 @@ class RungeKutta2(ODESolver):
     def advance(self):
         u, f, k, t = self.u, self.f, self.k, self.t
         dt = t[k+1] - t[k]
-        k1 = f(t[k - 1], u[k - 1])
-        k2 = f(t[k-1] + 2/3*dt, u[k -1] + 2/3 * dt * k1)
-        u_new = u[k - 1] + dt * (1/4*k1 + 3/4*k2)
+        bruh = dt * f(u[k], t[k])
+        bruh2 = dt * f(u[k] + 1/2*bruh, t[k] + 1/2 * dt)
+        u_new = u[k] + bruh2
         return u_new
 
 class Heun(ODESolver):
     def advance(self):
         u, f, k, t = self.u, self.f, self.k, self.t
         dt = t[k+1] - t[k]
-        ustar = u[k-1] + dt * f(u[k], t[k-1])
-        u_new = u[k-1] +1/2 * dt * f(u[k-1],t[k-1]) + 1/2 * dt * f(ustar, t[k])
+        ustar = u[k] + dt * f(u[k], t[k])
+        u_new = u[k] +1/2 * dt * f(u[k],t[k]) + 1/2 * dt * f(ustar, t[k])
         return u_new
 
-def f(x, t):
-    return x*np.cos(x) - np.sin(x)
+def f(u, t):
+    return t*np.cos(t) - np.sin(t)
 
 
 def exact(x):
@@ -79,10 +79,6 @@ plt.legend()
 plt.show()
 
 """
-From th eplots I get it seems they are ok ish approximations, however some of them get wayyy high with n = 20.
-so it was hard to see how they matched up with higher steps. Removed some to see before i added them back
-and if we remove some of the fewer steps they all look "decent". With the exception of RK4
-that just goes up and stays in a line. RK2 looks definatly the best tho, even though it goes up and
-down like crazy it moves in a wavey motion like it's supposed to
+From the plots I can see that rungekuta two and rungekutta 4 give the best approximations.
 """
 
