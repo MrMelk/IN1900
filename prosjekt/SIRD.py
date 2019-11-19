@@ -28,8 +28,12 @@ class Region:
             self.I.append(u[i][1])
             self.R.append(u[i][2])
             self.D.append(u[i][3])
+        self.S = np.array(self.S)
+        self.I = np.array(self.I)
+        self.R = np.array(self.R)
+        self.D = np.array(self.D)
+
         self.t = t
-        print(len(self.S), len(self.I), len(self.R), len(self.D), len(self.t))
         
         #Fikse dette med en løkke? skal jeg returne verdier? mest sannsynlig? nei skal jo plotte i denne klassen
 

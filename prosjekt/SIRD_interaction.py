@@ -38,22 +38,22 @@ class ProblemInteraction(ProblemSIRD):
         self.total_population = np.sum(self.total_population)
     
     def set_initial_condition(self):
-        self.first_list = [self.region.S0, self.region.I0, self.region.R0, self.region.D0 for region in self.region_name]
+        #self.first_list = [region.S0, region.I0, region.R0, region.D0 for region in self.region_name]
         #eller
-        """
-        first_list = []
+        
+        not_nested_list = []
         for i in range(len(self.region_name)):
-            first_list.append(self.region_name[i].S0)
-            first_list.append(self.region_name[i].I0)
-            first_list.append(self.region_name[i].R0)
-            first_list.append(self.region_name[i].D0)
-        """
+            not_nested_list.append(self.region_name[i].S0)
+            not_nested_list.append(self.region_name[i].I0)
+            not_nested_list.append(self.region_name[i].R0)
+            not_nested_list.append(self.region_name[i].D0)
+        
 
     def __call__(self, u, t):
         n = len(self.region_name)
 
         SIRD_list = [u[i:i+4] for i in range(0, len(u), 4)]
-
+        
         """
         S_list = SIRD_list[t][0]
         I_list = SIRD_list[t][1]
@@ -84,4 +84,32 @@ class ProblemInteraction(ProblemSIRD):
         return derivative
 
     def solution(self, u, t):
-        pass
+        n = len(t)
+        n_reg = len(self.region)
+        self.t = t
+        self.S = np.zeros(n)
+        self.I = np.zeros(n)
+        self.R = np.zeros(n)
+        self.D = np.zeros(n)
+        SIRD_list = [u[:, i:i+4] for i in range(0, n_reg*4, 4)]
+        for part, SIRD, in zip(self.region_name, SIRD_list):
+            part.set_SIRD_values()
+            self.S += part.S0
+            self.I += part.I0
+            self.R += part.R0
+            self.D += part.D0
+
+
+    def plot(self, x_label):
+        self.name = [region.name for region in self.region_name]#spør tobias om dette går greit
+        plt.title(self.name)
+        plt.plot(self.t, self.S, label = "Susceptible", color = "Blue")
+        plt.plot(self.t, self.I, label = "Infected", color = "Green")
+        plt.plot(self.t, self.R, label = "Immune", color = "Yellow")
+        plt.plot(self.t, self.D, label = "Deceased", color = "Black")
+        plt.xlabel(x_label)
+        plt.ylabel("Population")
+
+
+
+        
