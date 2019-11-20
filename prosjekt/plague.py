@@ -4,7 +4,7 @@ from ODESolver import RungeKutta4
 from SIRD import Region, ProblemSIRD, SolverSIRD
 from SIRD_interaction import RegionInteraction, ProblemInteraction
 
-alpha = 6.5e-5
+alpha = 7.5e-6
 beta = 0.1/4
 gamma = 0.9/4
 
@@ -34,6 +34,6 @@ def plague_Norway(alpha, beta, gamma, num_weeks, dt):
     plt.legend()
     plt.show()
 
-plague_Norway(alpha, beta, gamma, 52, 1)
+plague_Norway(alpha, beta, gamma, 104, 1/7)
 
 

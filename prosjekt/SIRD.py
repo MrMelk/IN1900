@@ -104,7 +104,7 @@ class SolverSIRD:
         self.T = T
         self.dt = dt
         self.total_population = problem.get_population()
-        print(self.total_population)
+        #print(self.total_population)
         self.t = np.linspace(0, self.T, self.T/self.dt)
     
     def terminate(self, u, t, k):#k er tidsstek mah BOI/GRILL

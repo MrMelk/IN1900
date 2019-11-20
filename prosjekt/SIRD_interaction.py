@@ -14,24 +14,29 @@ class RegionInteraction(Region):
         self.lon = longitude * np.pi/180
         super().__init__(name, S0, I0, R0, D0)
     
-        """def distance(self, other):  #Other must be touple of (latitude, longitude) in degrees
-        long_i = self.longitude
-        lat_i = self.latitude
-        long_j = other.longitude * np.pi/180              #other.longitude
-        lat_j = other.latitude * np.pi/180               #other.latitude
+    def distance(self, other):  #Other must be touple of (latitude, longitude) in degrees
+        R = 64
+        long_i = self.lon
+        lat_i = self.lat
+        long_j = other.lon * np.pi/180              #other.longitude
+        lat_j = other.lat * np.pi/180               #other.latitude
         dsigma = np.arccos(np.sin(lat_i) * np.sin(lat_j) + np.cos(lat_i) * np.cos(lat_j) * np.cos(np.abs(long_i - long_j)))
         test = np.sin(lat_i) * np.sin(lat_j) + np.cos(lat_i) * np.cos(lat_j) * np.cos(np.abs(long_i - long_j))
         
-        if test > 1:
-            return 0
-        else:
-
-            dist = R_earth * dsigma
+        
         if self == other:
-            return 0
-        print(dist)
-        return dist"""
-    
+            
+            dist = 0
+            #print(dist)
+            return dist
+        else:
+            dist = R * dsigma
+            #print(dist)
+            return dist
+        
+        
+        #return dist
+    """
     def distance(self, other):
         R=64
         inarccos = np.sin(self.lat)*np.sin(other.lat) + np.cos(self.lat)*np.cos(other.lat)*\
@@ -43,7 +48,8 @@ class RegionInteraction(Region):
         
         dist = R * dsigma
         return dist
-    
+    """
+
 class ProblemInteraction(ProblemSIRD):
     def __init__(self, region, alpha, beta, gamma):
         self.region_name = region
@@ -52,9 +58,9 @@ class ProblemInteraction(ProblemSIRD):
         super().__init__(region, alpha, beta, gamma)
     
     def get_population(self):
-        self.total_population = [region.population for region in self.region_name]
-        self.total_population = np.sum(self.total_population)
-        return self.total_population
+        total_population = [region.population for region in self.region_name]
+        total_population = np.sum(total_population)
+        return total_population
     
     def set_initial_condition(self):
         #self.first_list = [region.S0, region.I0, region.R0, region.D0 for region in self.region_name]
@@ -75,7 +81,7 @@ class ProblemInteraction(ProblemSIRD):
         I_list = [u[i] for i in range(1, len(u), 4)]
         SIRD_list = [u[i:i+4] for i in range(0, len(u), 4)]
         
-        self.derivative = []
+        derivative = []
         for i in range(n):
             S, I, R, D = SIRD_list[i]
             dS = 0
@@ -89,14 +95,15 @@ class ProblemInteraction(ProblemSIRD):
                 distance = self.region_name[i].distance(self.region_name[j])
                 #print(distance)
                 dS +=  -alpha * S * I_other*np.exp(-distance)
+                #print(dS)
             dR = beta * I
             dD = gamma * I
             dI = - beta * I - gamma * I
             dI += -dS
-        
-            self.derivative += [dS, dI, dR, dD]
+
+            derivative += [dS, dI, dR, dD]
         #print("derive",self.derivative)
-        return self.derivative
+        return derivative
 
     def solution(self, u, t):
         n = len(t)
