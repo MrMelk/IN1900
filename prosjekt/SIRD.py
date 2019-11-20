@@ -9,7 +9,7 @@ class Region:
         self.I0 = I0
         self.R0 = R0
         self.D0 = D0
-        self.population = S0 + I0 + R0 + D0
+        self.population = S0 + I0 + R0 - D0
 
     
     def set_SIRD_values(self, u, t):
@@ -104,6 +104,8 @@ class SolverSIRD:
         self.T = T
         self.dt = dt
         self.total_population = problem.get_population()
+        print(self.total_population)
+        self.t = np.linspace(0, self.T, self.T/self.dt)
     
     def terminate(self, u, t, k):#k er tidsstek mah BOI/GRILL
         u_k = u[k, :]
@@ -118,11 +120,16 @@ class SolverSIRD:
             print(msg)
             return True
 
-    def solve(self, method = RungeKutta4):
+    def solve(self, method = None):
+        
+        if not method:
+            method = RungeKutta4
+        print(method)
+        print(RungeKutta4)
         solver = method(self.problem)
         solver.set_initial_condition(self.problem.U0)
-        t = np.linspace(0, self.T, self.T/self.dt)
-        u, t = solver.solve(t, self.terminate)
+        
+        u, t = solver.solve(self.t)#, self.terminate)
         self.problem.solution(u, t)
 
 if __name__ == "__main__":

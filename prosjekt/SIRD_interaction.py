@@ -5,30 +5,48 @@ from SIRD import ProblemSIRD
 from SIRD import Region
 from SIRD import SolverSIRD
 
-R_earth = 64e4#63710  #km more correct than 64 * 10^4
+
 
 
 class RegionInteraction(Region):
     def __init__(self, latitude, longitude, name, S0, I0, R0, D0):
-        self.latitude = latitude * np.pi/180
-        self.longitude = longitude * np.pi/180
+        self.lat = latitude * np.pi/180
+        self.lon = longitude * np.pi/180
         super().__init__(name, S0, I0, R0, D0)
     
-    def distance(self, other):  #Other must be touple of (latitude, longitude) in degrees
+        """def distance(self, other):  #Other must be touple of (latitude, longitude) in degrees
         long_i = self.longitude
         lat_i = self.latitude
-        long_j = other[1] * np.pi/180              #other.longitude
-        lat_j = other[0] * np.pi/180               #other.longitude #other vil jo ikke ha longitude eller latitude dafuq?
+        long_j = other.longitude * np.pi/180              #other.longitude
+        lat_j = other.latitude * np.pi/180               #other.latitude
         dsigma = np.arccos(np.sin(lat_i) * np.sin(lat_j) + np.cos(lat_i) * np.cos(lat_j) * np.cos(np.abs(long_i - long_j)))
-        if long_i == long_j and lat_i == lat_j:
-            dist = 0
+        test = np.sin(lat_i) * np.sin(lat_j) + np.cos(lat_i) * np.cos(lat_j) * np.cos(np.abs(long_i - long_j))
+        
+        if test > 1:
+            return 0
         else:
+
             dist = R_earth * dsigma
+        if self == other:
+            return 0
+        print(dist)
+        return dist"""
+    
+    def distance(self, other):
+        R=64
+        inarccos = np.sin(self.lat)*np.sin(other.lat) + np.cos(self.lat)*np.cos(other.lat)*\
+            np.cos(abs(self.lon - other.lon))
+        if inarccos > 1:
+            dsigma = 0
+        else:
+            dsigma = np.arccos(inarccos)
+        
+        dist = R * dsigma
         return dist
     
 class ProblemInteraction(ProblemSIRD):
-    def __init__(self, regionInstances, region, alpha, beta, gamma):
-        self.region_name = regionInstances
+    def __init__(self, region, alpha, beta, gamma):
+        self.region_name = region
         #print(self.region_name[0].name)
         #names = [region.name for region in self.region_name]   #for å lage liste av navn
         super().__init__(region, alpha, beta, gamma)
@@ -36,6 +54,7 @@ class ProblemInteraction(ProblemSIRD):
     def get_population(self):
         self.total_population = [region.population for region in self.region_name]
         self.total_population = np.sum(self.total_population)
+        return self.total_population
     
     def set_initial_condition(self):
         #self.first_list = [region.S0, region.I0, region.R0, region.D0 for region in self.region_name]
@@ -47,41 +66,37 @@ class ProblemInteraction(ProblemSIRD):
             not_nested_list.append(self.region_name[i].I0)
             not_nested_list.append(self.region_name[i].R0)
             not_nested_list.append(self.region_name[i].D0)
+        self.U0 = not_nested_list
+        #print(self.U0)
         
 
     def __call__(self, u, t):
         n = len(self.region_name)
-
+        I_list = [u[i] for i in range(1, len(u), 4)]
         SIRD_list = [u[i:i+4] for i in range(0, len(u), 4)]
         
-        """
-        S_list = SIRD_list[t][0]
-        I_list = SIRD_list[t][1]
-        R_list = SIRD_list[t][2]
-        D_list = SIRD_list[t][3]
-        """
-        S_list = SIRD_list[0::4]
-        I_list = SIRD_list[1::4]
-        R_list = SIRD_list[2::4]
-        D_list = SIRD_list[3::4]
-        derivative = []
+        self.derivative = []
         for i in range(n):
             S, I, R, D = SIRD_list[i]
             dS = 0
-            dI = 0
-            dR = 0
-            dD = 0
+            alpha = self.alpha(t)
+            beta = self.beta(t)
+            gamma = self.gamma(t)
+            
             for j in range(n):
-                S_other = S_list[j]
+
                 I_other = I_list[j]
-                R_other = R_list[j]
-                D_other = D_list[j]
-                dS = (-1) * alpha * S_other * I_other
-                dI = alpha * S_other * I_other - beta * I_other - gamma * I_other
-                dR = beta * I_other
-                dD = gamma * I_other
-                derivative.append(dS, dI, dR, dD)
-        return derivative
+                distance = self.region_name[i].distance(self.region_name[j])
+                #print(distance)
+                dS +=  -alpha * S * I_other*np.exp(-distance)
+            dR = beta * I
+            dD = gamma * I
+            dI = - beta * I - gamma * I
+            dI += -dS
+        
+            self.derivative += [dS, dI, dR, dD]
+        #print("derive",self.derivative)
+        return self.derivative
 
     def solution(self, u, t):
         n = len(t)
@@ -92,8 +107,10 @@ class ProblemInteraction(ProblemSIRD):
         self.R = np.zeros(n)
         self.D = np.zeros(n)
         SIRD_list = [u[:, i:i+4] for i in range(0, n_reg*4, 4)]
-        for part, SIRD, in zip(self.region_name, SIRD_list):
-            part.set_SIRD_values()
+        #print(SIRD_list)
+        for part, SIRD in zip(self.region_name, SIRD_list):
+            part.set_SIRD_values(SIRD, t)
+            #print("part",part.S0)
             self.S += part.S0
             self.I += part.I0
             self.R += part.R0

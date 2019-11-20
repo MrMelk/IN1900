@@ -18,11 +18,22 @@ def plague_Norway(alpha, beta, gamma, num_weeks, dt):
     
     RegionList = [Vestlandet, Sorlandet, Ostlandet, Tronderlag, Nord_Norge]
 
-    problem = ProblemInteraction(RegionList, Vestlandet, alpha, beta, gamma)#hvorfor har jeg region igjen
+    problem = ProblemInteraction(RegionList, alpha, beta, gamma)#hvorfor har jeg region igjen
 
-    solver = SolverSIRD(problem, 52, 1)
+    solver = SolverSIRD(problem, num_weeks, dt)
+    #timepoints = np.linspace()
     solver.solve()
-    plt.figure(figsize = (60, 60))
+    plt.figure(figsize = (10, 10))
     index = 1
-    
+    for region in problem.region_name:
+        plt.subplot(2,3,index)
+        region.plot("time?")
+        index += 1
+    plt.subplot(2,3,index)
+    problem.plot("time?")
+    plt.legend()
+    plt.show()
+
+plague_Norway(alpha, beta, gamma, 52, 1)
+
 
