@@ -18,24 +18,19 @@ class RegionInteraction(Region):
         R = 64
         long_i = self.lon
         lat_i = self.lat
-        long_j = other.lon * np.pi/180              #other.longitude
-        lat_j = other.lat * np.pi/180               #other.latitude
+        long_j = other.lon             #other.longitude
+        lat_j = other.lat              #other.latitude
         dsigma = np.arccos(np.sin(lat_i) * np.sin(lat_j) + np.cos(lat_i) * np.cos(lat_j) * np.cos(np.abs(long_i - long_j)))
-        test = np.sin(lat_i) * np.sin(lat_j) + np.cos(lat_i) * np.cos(lat_j) * np.cos(np.abs(long_i - long_j))
-        
         
         if self == other:
             
             dist = 0
-            #print(dist)
             return dist
         else:
             dist = R * dsigma
-            #print(dist)
             return dist
-        
-        
-        #return dist
+
+
     """
     def distance(self, other):
         R=64
@@ -51,35 +46,33 @@ class RegionInteraction(Region):
     """
 
 class ProblemInteraction(ProblemSIRD):
-    def __init__(self, region, alpha, beta, gamma):
-        self.region_name = region
-        #print(self.region_name[0].name)
-        #names = [region.name for region in self.region_name]   #for å lage liste av navn
+    def __init__(self, region, alpha, beta, gamma, region_name):
+        self.region_name = region_name
         super().__init__(region, alpha, beta, gamma)
     
     def get_population(self):
-        total_population = [region.population for region in self.region_name]
+        total_population = [region.population for region in self.region]
         total_population = np.sum(total_population)
         return total_population
     
     def set_initial_condition(self):
-        #self.first_list = [region.S0, region.I0, region.R0, region.D0 for region in self.region_name]
+        #self.first_list = [region.S0, region.I0, region.R0, region.D0 for region in self.region]
         #eller
         
         not_nested_list = []
-        for i in range(len(self.region_name)):
-            not_nested_list.append(self.region_name[i].S0)
-            not_nested_list.append(self.region_name[i].I0)
-            not_nested_list.append(self.region_name[i].R0)
-            not_nested_list.append(self.region_name[i].D0)
+        for i in range(len(self.region)):
+            not_nested_list.append(self.region[i].S0)
+            not_nested_list.append(self.region[i].I0)
+            not_nested_list.append(self.region[i].R0)
+            not_nested_list.append(self.region[i].D0)
         self.U0 = not_nested_list
         #print(self.U0)
         
 
     def __call__(self, u, t):
-        n = len(self.region_name)
+        n = len(self.region)
         I_list = [u[i] for i in range(1, len(u), 4)]
-        SIRD_list = [u[i:i+4] for i in range(0, len(u), 4)]
+        SIRD_list = [u[i:i+4] for i in range(0, n*4, 4)]
         
         derivative = []
         for i in range(n):
@@ -92,14 +85,13 @@ class ProblemInteraction(ProblemSIRD):
             for j in range(n):
 
                 I_other = I_list[j]
-                distance = self.region_name[i].distance(self.region_name[j])
-                #print(distance)
+                distance = self.region[i].distance(self.region[j])
                 dS +=  -alpha * S * I_other*np.exp(-distance)
                 #print(dS)
             dR = beta * I
             dD = gamma * I
-            dI = - beta * I - gamma * I
-            dI += -dS
+            dI = - beta * I - gamma * I - dS
+            
 
             derivative += [dS, dI, dR, dD]
         #print("derive",self.derivative)
@@ -114,19 +106,21 @@ class ProblemInteraction(ProblemSIRD):
         self.R = np.zeros(n)
         self.D = np.zeros(n)
         SIRD_list = [u[:, i:i+4] for i in range(0, n_reg*4, 4)]
+        
         #print(SIRD_list)
-        for part, SIRD in zip(self.region_name, SIRD_list):
+        
+        for part, SIRD in zip(self.region, SIRD_list):
             part.set_SIRD_values(SIRD, t)
             #print("part",part.S0)
-            self.S += part.S0
-            self.I += part.I0
-            self.R += part.R0
-            self.D += part.D0
+            self.S += part.S
+            self.I += part.I
+            self.R += part.R
+            self.D += part.D
 
 
     def plot(self, x_label):
-        self.name = [region.name for region in self.region_name]#spør tobias om dette går greit
-        plt.title(self.name)
+        self.name = [region.name for region in self.region]#spør tobias om dette går greit
+        plt.title(self.region_name)
         plt.plot(self.t, self.S, label = "Susceptible", color = "Blue")
         plt.plot(self.t, self.I, label = "Infected", color = "Green")
         plt.plot(self.t, self.R, label = "Immune", color = "Yellow")
@@ -135,5 +129,8 @@ class ProblemInteraction(ProblemSIRD):
         plt.ylabel("Population")
 
 
-
+"""
+Run example:
+doesn't do anything as there's nothing called or used heres
+"""
         

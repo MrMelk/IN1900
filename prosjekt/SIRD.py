@@ -9,7 +9,7 @@ class Region:
         self.I0 = I0
         self.R0 = R0
         self.D0 = D0
-        self.population = S0 + I0 + R0 - D0
+        self.population = S0 + I0 + R0 + D0
 
     
     def set_SIRD_values(self, u, t):
@@ -129,7 +129,7 @@ class SolverSIRD:
         solver = method(self.problem)
         solver.set_initial_condition(self.problem.U0)
         
-        u, t = solver.solve(self.t)#, self.terminate)
+        u, t = solver.solve(self.t, self.terminate)
         self.problem.solution(u, t)
 
 if __name__ == "__main__":
@@ -150,3 +150,8 @@ if __name__ == "__main__":
 
     plt.legend()
     plt.show()
+
+"""
+Run example:
+Shows exactly the same as bjorgvin.py which is what is supposed to do.
+"""

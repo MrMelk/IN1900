@@ -22,7 +22,7 @@ def solvelolve(u, t):
     dd = gamma*I0
     return(ds, di, dr, dd)
 
-def terminate(u, t, k):#k er tidsstek mah BOI/GRILL
+def terminate(u, t, k):
     u_k = u[k, :]
     u_k_minus_1 = u[k-1, :]
     test = np.abs(np.sum(u_k_minus_1) - np.sum(u_k))
@@ -83,36 +83,10 @@ if __name__ =="__main__":
 
 
 """
-def solving(u, t):
-    S0 = u[0]
-    I0 = u[1]
-    R0 = u[2]
-    D0 = u[3]
-    S =  -alpha*S0*I0
-    I = alpha*S0*I0 - beta*I0 - gamma*I0
-    R = beta*I0
-    D = gamma*I0
-    return (S, I, R, D)
-    
+Run example:
+Get a plot that shows people getting infected, dying, recovering.
+Steady decrease until it converges.
 
-
-def plotting(u, t):
-    for i in range(len(u)-1):
-        plt.plot(t,u[i])
-    
-    plt.show()
-
-
-U0 = (7000, 30, 0, 0)
-
-swaggyboi = RungeKutta4(solving)
-swaggyboi.set_initial_condition(U0)
-u, t = swaggyboi.solve(t)
-print(len(u))
-print(len(t))
-
-print(u)
-#plotting(u, t)
 """
 
 
