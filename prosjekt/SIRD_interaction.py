@@ -31,20 +31,6 @@ class RegionInteraction(Region):
             return dist
 
 
-    """
-    def distance(self, other):
-        R=64
-        inarccos = np.sin(self.lat)*np.sin(other.lat) + np.cos(self.lat)*np.cos(other.lat)*\
-            np.cos(abs(self.lon - other.lon))
-        if inarccos > 1:
-            dsigma = 0
-        else:
-            dsigma = np.arccos(inarccos)
-        
-        dist = R * dsigma
-        return dist
-    """
-
 class ProblemInteraction(ProblemSIRD):
     def __init__(self, region, alpha, beta, gamma, region_name):
         self.region_name = region_name
@@ -56,9 +42,7 @@ class ProblemInteraction(ProblemSIRD):
         return total_population
     
     def set_initial_condition(self):
-        #self.first_list = [region.S0, region.I0, region.R0, region.D0 for region in self.region]
-        #eller
-        
+
         not_nested_list = []
         for i in range(len(self.region)):
             not_nested_list.append(self.region[i].S0)
@@ -66,7 +50,7 @@ class ProblemInteraction(ProblemSIRD):
             not_nested_list.append(self.region[i].R0)
             not_nested_list.append(self.region[i].D0)
         self.U0 = not_nested_list
-        #print(self.U0)
+
         
 
     def __call__(self, u, t):
@@ -87,14 +71,12 @@ class ProblemInteraction(ProblemSIRD):
                 I_other = I_list[j]
                 distance = self.region[i].distance(self.region[j])
                 dS +=  -alpha * S * I_other*np.exp(-distance)
-                #print(dS)
             dR = beta * I
             dD = gamma * I
             dI = - beta * I - gamma * I - dS
             
 
             derivative += [dS, dI, dR, dD]
-        #print("derive",self.derivative)
         return derivative
 
     def solution(self, u, t):
@@ -106,12 +88,9 @@ class ProblemInteraction(ProblemSIRD):
         self.R = np.zeros(n)
         self.D = np.zeros(n)
         SIRD_list = [u[:, i:i+4] for i in range(0, n_reg*4, 4)]
-        
-        #print(SIRD_list)
-        
+
         for part, SIRD in zip(self.region, SIRD_list):
             part.set_SIRD_values(SIRD, t)
-            #print("part",part.S0)
             self.S += part.S
             self.I += part.I
             self.R += part.R

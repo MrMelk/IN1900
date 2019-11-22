@@ -13,12 +13,6 @@ class Region:
 
     
     def set_SIRD_values(self, u, t):
-        """self.S = u[0]
-        self.I = u[1]
-        self.R = u[2]
-        self.D = u[3]
-        self.t = t
-        """
         self.S = []
         self.I = []
         self.R = []
@@ -35,7 +29,6 @@ class Region:
 
         self.t = t
         
-        #Fikse dette med en løkke? skal jeg returne verdier? mest sannsynlig? nei skal jo plotte i denne klassen
 
     
     def plot(self, x_label):
@@ -79,12 +72,7 @@ class ProblemSIRD:
         self.region.set_SIRD_values(u, t)
     
     def __call__(self, u, t):
-        """
-        S0 = self.S0
-        I0 = self.I0
-        R0 = self.R0
-        D0 = self.D0
-        """
+
         S0 = u[0]
         I0 = u[1]
         R0 = u[2]
@@ -104,13 +92,11 @@ class SolverSIRD:
         self.T = T
         self.dt = dt
         self.total_population = problem.get_population()
-        #print(self.total_population)
         self.t = np.linspace(0, self.T, self.T/self.dt)
     
-    def terminate(self, u, t, k):#k er tidsstek mah BOI/GRILL
+    def terminate(self, u, t, k):#k er tidssteg mah BOI/GRILL
         u_k = u[k, :]
-        #u_k_minus_1 = u[k-1, :]
-        test = np.abs(self.total_population - np.sum(u_k))#np.sum(u_k_minus_1)
+        test = np.abs(self.total_population - np.sum(u_k))
         tol = 1e-9
 
         msg = "They aint the same bro. THEY AINT THE SAME"
@@ -123,9 +109,7 @@ class SolverSIRD:
     def solve(self, method = None):
         
         if not method:
-            method = RungeKutta4
-        print(method)
-        print(RungeKutta4)
+            method = RungeKutta4        #denne ble lagt til fordi skulle sjekke noe under debugging
         solver = method(self.problem)
         solver.set_initial_condition(self.problem.U0)
         
@@ -133,7 +117,6 @@ class SolverSIRD:
         self.problem.solution(u, t)
 
 if __name__ == "__main__":
-    #U0 = (7000, 30, 0, 0)
     alpha = 6.5e-5
     beta = 0.1/4
     gamma = 0.9/4
